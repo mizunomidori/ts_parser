@@ -11,6 +11,7 @@ static constexpr uint8_t BITMASK_GL = 0xFF;
 static constexpr uint8_t BITMASK_GR = 0x7F;
 
 CharDecoder::CharDecoder()
+	: middle_size_flag(false)
 {
 }
 
@@ -115,7 +116,12 @@ void CharDecoder::decode_C0(const uint8_t* buffer)
 		++read;
 		break;
 	case SP:
-		chars += "Å@";
+		if (middle_size_flag) {
+			chars += " ";
+		}
+		else {
+			chars += "Å@";
+		}
 	default:
 		++read;
 		break;
@@ -145,10 +151,16 @@ void CharDecoder::decode_C1(const uint8_t* buffer)
 		break;
 	case C1_SSZ:
 		// Character size: small
+		++read;
+		break;
 	case C1_MSZ:
 		// Character size: middle
+		middle_size_flag = true;
+		++read;
+		break;
 	case C1_NSZ:
 		// Character size: normal
+		middle_size_flag = false;
 		++read;
 		break;
 	case C1_SZX:
@@ -217,7 +229,12 @@ void CharDecoder::decode_GLGR(const uint8_t* buffer, const GStatus& GLGR)
 		}
 		case ASCII:
 		case PROPORTIONAL_ASCII: {
-			chars += ASCII_TABLE[(buffer[0] & BitMask) - 0x21];
+			if (middle_size_flag) {
+				chars += HALF_ASCII_TABLE[(buffer[0] & BitMask) - 0x21];
+			}
+			else {
+				chars += ASCII_TABLE[(buffer[0] & BitMask) - 0x21];
+			}
 			break;
 		}
 		case HIRA:
@@ -245,6 +262,7 @@ void CharDecoder::decode_GLGR(const uint8_t* buffer, const GStatus& GLGR)
 		}
 	}
 	else if (GLGR.code_set_class == CodeSetClass::DRCS) {
+		// Not used in EPGs
 		switch (buffer[0]) {
 		case 0x60:
 			decode(DEFAULT_MACRO_CODE0.data(), DEFAULT_MACRO_CODE0.size());

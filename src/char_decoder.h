@@ -280,5 +280,7 @@ public:
 private:
 	uint16_t read_length;
 	std::string chars;
+
+	bool middle_size_flag;
 };
 
