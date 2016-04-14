@@ -274,8 +274,8 @@ public:
 	void jis_to_sjis(uint8_t first, uint8_t second);
 
 	GStatus code_elements[4];
-	GStatus GL;
-	GStatus GR;
+	GStatus *GL;
+	GStatus *GR;
 
 private:
 	uint16_t read_length;

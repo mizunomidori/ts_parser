@@ -21,8 +21,8 @@ void CharDecoder::init()
 	code_elements[1] = { CodeSetClass::GSet, ASCII, 1 }; // G1
 	code_elements[2] = { CodeSetClass::GSet, HIRA,  1 }; // G2
 	code_elements[3] = { CodeSetClass::GSet, KANA,  1 }; // G3
-	GL = code_elements[0]; // LS0  (G0)
-	GR = code_elements[2]; // LS2R (G2)
+	GL = &code_elements[0]; // LS0  (G0)
+	GR = &code_elements[2]; // LS2R (G2)
 	chars = "";
 }
 
@@ -50,13 +50,13 @@ void CharDecoder::decode(const uint8_t* buffer, const uint16_t length)
 			decode_C0(it);
 		}
 		else if (*it < 0x7F) {
-			decode_GLGR<BITMASK_GL>(it, GL);
+			decode_GLGR<BITMASK_GL>(it, *GL);
 		}
 		else if (*it <= 0xA0) {
 			decode_C1(&(*it));
 		}
 		else if (*it < 0xFF) {
-			decode_GLGR<BITMASK_GR>(it, GR);
+			decode_GLGR<BITMASK_GR>(it, *GR);
 		}
 		else {
 			++it;
@@ -98,11 +98,11 @@ void CharDecoder::decode_C0(const uint8_t* buffer)
 		decode_ESC(buffer);
 		break;
 	case C0_LS1:
-		GL = code_elements[1];
+		GL = &code_elements[1];
 		++read;
 		break;
 	case C0_LS0:
-		GL = code_elements[0];
+		GL = &code_elements[0];
 		++read;
 		break;
 	case C0_SS2:
@@ -354,27 +354,27 @@ void CharDecoder::decode_ESC(const uint8_t* buffer)
 		// Table 7-1  Invocation of code elements
 	case 0x6E:
 		// LS2
-		GL = code_elements[2];
+		GL = &code_elements[2];
 		read += 2;
 		break;
 	case 0x6F:
 		// LS3
-		GL = code_elements[3];
+		GL = &code_elements[3];
 		read += 2;
 		break;
 	case 0x7E:
 		// LS1R
-		GR = code_elements[1];
+		GR = &code_elements[1];
 		read += 2;
 		break;
 	case 0x7D:
 		// LS2R
-		GR = code_elements[2];
+		GR = &code_elements[2];
 		read += 2;
 		break;
 	case 0x7C:
 		// LS3R
-		GR = code_elements[3];
+		GR = &code_elements[3];
 		read += 2;
 		break;
 
@@ -454,10 +454,10 @@ void CharDecoder::decode_SS(const uint8_t* buffer)
 {
 	// Single shift
 	const auto last_GL = GL;
-	GL = code_elements[N];
+	GL = &code_elements[N];
 
 	++read_length;
-	decode_GLGR<BITMASK_GL>(&buffer[1], GL);
+	decode_GLGR<BITMASK_GL>(&buffer[1], *GL);
 
 	GL = last_GL;
 }
