@@ -28,14 +28,10 @@ read_bits(const uint8_t* buffer, const int start_bit, const int bit_length)
 	return value & mask;
 }
 
-template<typename T>
-static std::unique_ptr<T[]> memcopy_to_unique(const T* start, const T* end)
+template<typename T, std::size_t N>
+static inline std::size_t get_array_size(const T (&)[N])
 {
-	const std::vector<T> vec(start, end);
-	std::unique_ptr<T[]> ret(new T[end - start]);
-	if (!ret) throw std::runtime_error("Null pointer.");
-	std::copy(vec.begin(), vec.end(), ret.get());
-	return ret;
+	return N;
 }
 
 template<typename T>

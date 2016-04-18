@@ -6,6 +6,7 @@
  */
 
 #include "char_decoder.h"
+#include "ts_common_utils.h"
 
 static constexpr uint8_t BITMASK_GL = 0xFF;
 static constexpr uint8_t BITMASK_GR = 0x7F;
@@ -330,20 +331,29 @@ void CharDecoder::jis_to_sjis(uint8_t first, uint8_t second)
 
 	if (first >= 0x75 && second >= 0x21) {
 		// Supplemental character (Gaiji)
-		return;
+		static const auto size = get_array_size(GAIJI_TABLE);
+		const auto code = first << 8 | second;
+
+		for (auto i = 0; i < size; ++i) {
+			if (code == GAIJI_TABLE[i].code) {
+				chars += GAIJI_TABLE[i].character;
+				break;
+			}
+		}
 	}
+	else {
+		// offset
+		const auto cell = first & 1 ? 0x1F + (second > 0x5F) : 0x7E;
 
-	// offset
-	const auto cell = first & 1 ? 0x1F + (second > 0x5F) : 0x7E;
+		second = (second + cell) & 0xFF;
 
-	second = (second + cell) & 0xFF;
+		first = (first - 0x21) >> 1;
+		const auto row = first >= 0x1F ? 0xC1 : 0x81;
+		first += row;
 
-	first = (first - 0x21) >> 1;
-	const auto row = first >= 0x1F ? 0xC1 : 0x81;
-	first += row;
-
-	const char sjis_kanji[3]{ static_cast<char>(first), static_cast<char>(second) };
-	chars += sjis_kanji;
+		const char sjis_kanji[3]{ static_cast<char>(first), static_cast<char>(second) };
+		chars += sjis_kanji;
+	}
 }
 
 void CharDecoder::decode_ESC(const uint8_t* buffer)
