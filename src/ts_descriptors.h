@@ -1380,147 +1380,150 @@ struct HybridInformationDescriptor
 
 struct DescriptorData
 {
-	std::unique_ptr<VideoStreamDescriptor>                 video_stream;
-	std::unique_ptr<AudioStreamDescriptor>                 audio_stream;
-	std::unique_ptr<DataStreamAlignmentDescriptor>         data_stream;
-	std::unique_ptr<TargetBackgroundGridDescriptor>        target_bk_grid;
-	std::unique_ptr<VideoWindowDescriptor>                 video_window;
-	std::unique_ptr<CADescriptor>                          CA;
-	std::unique_ptr<ISO639LanguageDescriptor>              ISO_639_language;
-	std::unique_ptr<SystemClockDescriptor>                 sys_clock;
-	std::unique_ptr<MultiplexBufferUtilizationDescriptor>  mpx_buf_util;
-	std::unique_ptr<CopyrightDescriptor>                   copyright;
-	std::unique_ptr<MaximumBitrateDescriptor>              max_bitrate;
+	uint8_t descriptor_tag;
 
-	std::unique_ptr<BouquetNameDescriptor>                 bouquet_name;
-	std::unique_ptr<CAIdentifierDescriptor>                CA_id;
-	std::unique_ptr<ComponentDescriptor>                   component;
-	std::unique_ptr<ContentDescriptor>                     content;
-	std::unique_ptr<CountryAvailabilityDescriptor>         country;
-	std::unique_ptr<SateliteDeliverySystemDescriptor>      satelite;
-	std::unique_ptr<ExtendedEventDescriptor>               ext_event;
-	std::unique_ptr<LinkageDescriptor>                     link;
-	std::unique_ptr<MosaicDescriptor>                      mosaic;
-	std::unique_ptr<NVODReferenceDescriptor>               NVOD_ref;
-	std::unique_ptr<NetworkNameDescriptor>                 network_name;
-	std::unique_ptr<ParentalRatingDescriptor>              parental_rating;
-	std::unique_ptr<ServiceDescriptor>                     service;
-	std::unique_ptr<ServiceListDescriptor>                 service_list;
-	std::unique_ptr<ShortEventDescriptor>                  short_event;
-	std::unique_ptr<StreamIdentifierDescriptor>            stream_id;
-	std::unique_ptr<SttuffingDescriptor>                   stuffing;
-	std::unique_ptr<TimeShiftedEventDescriptor>            time_shifted_event;
-	std::unique_ptr<TimeShiftedServiceDescriptor>          time_shifted_service;
-	std::unique_ptr<DataComponentDescriptor>               data_component;
-	std::unique_ptr<SystemManagementDescriptor>            system_management;
-	std::unique_ptr<HierarchicalTransmissionDescriptor>    hierarchical_trans;
-	std::unique_ptr<DigitalCopyControlDescriptor>          digital_copy_ctrl;
-	std::unique_ptr<EmergencyInformationDescriptor>        emergency;
-	std::unique_ptr<LocalTimeOffsetDescriptor>             local_time_offset;
-	std::unique_ptr<AudioComponentDescriptor>              audio_component;
-	std::unique_ptr<TargetRegionDescriptor>                target_region;
-	std::unique_ptr<DataContentDescriptor>                 data_content;
-	std::unique_ptr<HyperlinkDescriptor>                   hyperlink;
-	std::unique_ptr<VideoDecodeControlDescriptor>          video_dec_ctrl;
-	std::unique_ptr<TerrestrialDeliberySystemDescriptor>   terrestrial;
-	std::unique_ptr<PartialReceptionDescriptor>            partial_reception;
-	std::unique_ptr<SeriesDescriptor>                      series;
-	std::unique_ptr<EventGroupDescriptor>                  event_group;
-	std::unique_ptr<SIParameterDescriptor>                 SI_param;
-	std::unique_ptr<BroadcasterNameDescriptor>             broadcaster_name;
-	std::unique_ptr<ComponentGroupDescriptor>              component_group;
-	std::unique_ptr<SIPrimeTsDescriptor>                   SI_prime_ts;
-	std::unique_ptr<BoardInformationDescriptor>            board_info;
-	std::unique_ptr<LDTLinkageDescriptor>                  LDT_link;
-	std::unique_ptr<ConnectedTransmissionDescriptor>       connected_trans;
-	std::unique_ptr<TSInformationDescriptor>               TS_info;
-	std::unique_ptr<ExtendedBroadcasterDescriptor>         ext_broadcaster;
-	std::unique_ptr<LogoTransmissionDescriptor>            logo_trans;
-	std::unique_ptr<ContentAvailabilityDescriptor>         content_availability;
-	std::unique_ptr<CarouselCompatibleCompositeDescriptor> carousel;
-	std::unique_ptr<AVCVideoDescriptor>                    AVC_video;
-	std::unique_ptr<AVCTimingAndHRFDescriptor>             AVC_timing;
-	std::unique_ptr<ServiceGroupDescriptor>                service_group;
-	std::unique_ptr<MPEG4AudioDescriptor>                  MPEG4_audio;
-	std::unique_ptr<MPEG4AudioExtensionDescriptor>         MPEG4_audio_ext;
-	std::unique_ptr<RegistrationDescriptor>                registration;
-	std::unique_ptr<DataBroadcastIdDescriptor>             data_broadcast_id;
-	std::unique_ptr<AccessControlDescriptor>               access_ctrl;
-	std::unique_ptr<AreaBroadcastingInformationDescriptor> area;
-	std::unique_ptr<HEVCDescriptor>                        HEVC;
-	std::unique_ptr<HierarchyDescriptor>                   hierarchy;
-	std::unique_ptr<HybridInformationDescriptor>           hybrid;
+	std::shared_ptr<VideoStreamDescriptor>                 video_stream;
+	std::shared_ptr<AudioStreamDescriptor>                 audio_stream;
+	std::shared_ptr<DataStreamAlignmentDescriptor>         data_stream;
+	std::shared_ptr<TargetBackgroundGridDescriptor>        target_bk_grid;
+	std::shared_ptr<VideoWindowDescriptor>                 video_window;
+	std::shared_ptr<CADescriptor>                          CA;
+	std::shared_ptr<ISO639LanguageDescriptor>              ISO_639_language;
+	std::shared_ptr<SystemClockDescriptor>                 sys_clock;
+	std::shared_ptr<MultiplexBufferUtilizationDescriptor>  mpx_buf_util;
+	std::shared_ptr<CopyrightDescriptor>                   copyright;
+	std::shared_ptr<MaximumBitrateDescriptor>              max_bitrate;
 
-	DescriptorData() :
-		video_stream(nullptr),
-		audio_stream(nullptr),
-		data_stream(nullptr),
-		target_bk_grid(nullptr),
-		video_window(nullptr),
-		CA(nullptr),
-		ISO_639_language(nullptr),
-		sys_clock(nullptr),
-		mpx_buf_util(nullptr),
-		copyright(nullptr),
-		max_bitrate(nullptr),
-		bouquet_name(nullptr),
-		CA_id(nullptr),
-		component(nullptr),
-		content(nullptr),
-		country(nullptr),
-		satelite(nullptr),
-		ext_event(nullptr),
-		link(nullptr),
-		mosaic(nullptr),
-		NVOD_ref(nullptr),
-		network_name(nullptr),
-		parental_rating(nullptr),
-		service(nullptr),
-		service_list(nullptr),
-		short_event(nullptr),
-		stream_id(nullptr),
-		stuffing(nullptr),
-		time_shifted_event(nullptr),
-		time_shifted_service(nullptr),
-		data_component(nullptr),
-		system_management(nullptr),
-		hierarchical_trans(nullptr),
-		digital_copy_ctrl(nullptr),
-		emergency(nullptr),
-		local_time_offset(nullptr),
-		audio_component(nullptr),
-		target_region(nullptr),
-		data_content(nullptr),
-		hyperlink(nullptr),
-		video_dec_ctrl(nullptr),
-		terrestrial(nullptr),
-		partial_reception(nullptr),
-		series(nullptr),
-		event_group(nullptr),
-		SI_param(nullptr),
-		broadcaster_name(nullptr),
-		component_group(nullptr),
-		SI_prime_ts(nullptr),
-		board_info(nullptr),
-		LDT_link(nullptr),
-		connected_trans(nullptr),
-		TS_info(nullptr),
-		ext_broadcaster(nullptr),
-		logo_trans(nullptr),
-		content_availability(nullptr),
-		carousel(nullptr),
-		AVC_video(nullptr),
-		AVC_timing(nullptr),
-		service_group(nullptr),
-		MPEG4_audio(nullptr),
-		MPEG4_audio_ext(nullptr),
-		registration(nullptr),
-		data_broadcast_id(nullptr),
-		access_ctrl(nullptr),
-		area(nullptr),
-		HEVC(nullptr),
-		hierarchy(nullptr),
-		hybrid(nullptr) {}
+	std::shared_ptr<BouquetNameDescriptor>                 bouquet_name;
+	std::shared_ptr<CAIdentifierDescriptor>                CA_id;
+	std::shared_ptr<ComponentDescriptor>                   component;
+	std::shared_ptr<ContentDescriptor>                     content;
+	std::shared_ptr<CountryAvailabilityDescriptor>         country;
+	std::shared_ptr<SateliteDeliverySystemDescriptor>      satelite;
+	std::shared_ptr<ExtendedEventDescriptor>               ext_event;
+	std::shared_ptr<LinkageDescriptor>                     link;
+	std::shared_ptr<MosaicDescriptor>                      mosaic;
+	std::shared_ptr<NVODReferenceDescriptor>               NVOD_ref;
+	std::shared_ptr<NetworkNameDescriptor>                 network_name;
+	std::shared_ptr<ParentalRatingDescriptor>              parental_rating;
+	std::shared_ptr<ServiceDescriptor>                     service;
+	std::shared_ptr<ServiceListDescriptor>                 service_list;
+	std::shared_ptr<ShortEventDescriptor>                  short_event;
+	std::shared_ptr<StreamIdentifierDescriptor>            stream_id;
+	std::shared_ptr<SttuffingDescriptor>                   stuffing;
+	std::shared_ptr<TimeShiftedEventDescriptor>            time_shifted_event;
+	std::shared_ptr<TimeShiftedServiceDescriptor>          time_shifted_service;
+	std::shared_ptr<DataComponentDescriptor>               data_component;
+	std::shared_ptr<SystemManagementDescriptor>            system_management;
+	std::shared_ptr<HierarchicalTransmissionDescriptor>    hierarchical_trans;
+	std::shared_ptr<DigitalCopyControlDescriptor>          digital_copy_ctrl;
+	std::shared_ptr<EmergencyInformationDescriptor>        emergency;
+	std::shared_ptr<LocalTimeOffsetDescriptor>             local_time_offset;
+	std::shared_ptr<AudioComponentDescriptor>              audio_component;
+	std::shared_ptr<TargetRegionDescriptor>                target_region;
+	std::shared_ptr<DataContentDescriptor>                 data_content;
+	std::shared_ptr<HyperlinkDescriptor>                   hyperlink;
+	std::shared_ptr<VideoDecodeControlDescriptor>          video_dec_ctrl;
+	std::shared_ptr<TerrestrialDeliberySystemDescriptor>   terrestrial;
+	std::shared_ptr<PartialReceptionDescriptor>            partial_reception;
+	std::shared_ptr<SeriesDescriptor>                      series;
+	std::shared_ptr<EventGroupDescriptor>                  event_group;
+	std::shared_ptr<SIParameterDescriptor>                 SI_param;
+	std::shared_ptr<BroadcasterNameDescriptor>             broadcaster_name;
+	std::shared_ptr<ComponentGroupDescriptor>              component_group;
+	std::shared_ptr<SIPrimeTsDescriptor>                   SI_prime_ts;
+	std::shared_ptr<BoardInformationDescriptor>            board_info;
+	std::shared_ptr<LDTLinkageDescriptor>                  LDT_link;
+	std::shared_ptr<ConnectedTransmissionDescriptor>       connected_trans;
+	std::shared_ptr<TSInformationDescriptor>               TS_info;
+	std::shared_ptr<ExtendedBroadcasterDescriptor>         ext_broadcaster;
+	std::shared_ptr<LogoTransmissionDescriptor>            logo_trans;
+	std::shared_ptr<ContentAvailabilityDescriptor>         content_availability;
+	std::shared_ptr<CarouselCompatibleCompositeDescriptor> carousel;
+	std::shared_ptr<AVCVideoDescriptor>                    AVC_video;
+	std::shared_ptr<AVCTimingAndHRFDescriptor>             AVC_timing;
+	std::shared_ptr<ServiceGroupDescriptor>                service_group;
+	std::shared_ptr<MPEG4AudioDescriptor>                  MPEG4_audio;
+	std::shared_ptr<MPEG4AudioExtensionDescriptor>         MPEG4_audio_ext;
+	std::shared_ptr<RegistrationDescriptor>                registration;
+	std::shared_ptr<DataBroadcastIdDescriptor>             data_broadcast_id;
+	std::shared_ptr<AccessControlDescriptor>               access_ctrl;
+	std::shared_ptr<AreaBroadcastingInformationDescriptor> area;
+	std::shared_ptr<HEVCDescriptor>                        HEVC;
+	std::shared_ptr<HierarchyDescriptor>                   hierarchy;
+	std::shared_ptr<HybridInformationDescriptor>           hybrid;
+
+	DescriptorData()
+		: descriptor_tag(0xFF)
+		, video_stream(nullptr)
+		, audio_stream(nullptr)
+		, data_stream(nullptr)
+		, target_bk_grid(nullptr)
+		, video_window(nullptr)
+		, CA(nullptr)
+		, ISO_639_language(nullptr)
+		, sys_clock(nullptr)
+		, mpx_buf_util(nullptr)
+		, copyright(nullptr)
+		, max_bitrate(nullptr)
+		, bouquet_name(nullptr)
+		, CA_id(nullptr)
+		, component(nullptr)
+		, content(nullptr)
+		, country(nullptr)
+		, satelite(nullptr)
+		, ext_event(nullptr)
+		, link(nullptr)
+		, mosaic(nullptr)
+		, NVOD_ref(nullptr)
+		, network_name(nullptr)
+		, parental_rating(nullptr)
+		, service(nullptr)
+		, service_list(nullptr)
+		, short_event(nullptr)
+		, stream_id(nullptr)
+		, stuffing(nullptr)
+		, time_shifted_event(nullptr)
+		, time_shifted_service(nullptr)
+		, data_component(nullptr)
+		, system_management(nullptr)
+		, hierarchical_trans(nullptr)
+		, digital_copy_ctrl(nullptr)
+		, emergency(nullptr)
+		, local_time_offset(nullptr)
+		, audio_component(nullptr)
+		, target_region(nullptr)
+		, data_content(nullptr)
+		, hyperlink(nullptr)
+		, video_dec_ctrl(nullptr)
+		, terrestrial(nullptr)
+		, partial_reception(nullptr)
+		, series(nullptr)
+		, event_group(nullptr)
+		, SI_param(nullptr)
+		, broadcaster_name(nullptr)
+		, component_group(nullptr)
+		, SI_prime_ts(nullptr)
+		, board_info(nullptr)
+		, LDT_link(nullptr)
+		, connected_trans(nullptr)
+		, TS_info(nullptr)
+		, ext_broadcaster(nullptr)
+		, logo_trans(nullptr)
+		, content_availability(nullptr)
+		, carousel(nullptr)
+		, AVC_video(nullptr)
+		, AVC_timing(nullptr)
+		, service_group(nullptr)
+		, MPEG4_audio(nullptr)
+		, MPEG4_audio_ext(nullptr)
+		, registration(nullptr)
+		, data_broadcast_id(nullptr)
+		, access_ctrl(nullptr)
+		, area(nullptr)
+		, HEVC(nullptr)
+		, hierarchy(nullptr)
+		, hybrid(nullptr) {}
 };
 
 class Descriptor
@@ -1531,7 +1534,6 @@ public:
 	Descriptor() = default;
 	virtual ~Descriptor() = default;
 
-private:
 	std::vector<DescriptorData> desc_list;
 };
 

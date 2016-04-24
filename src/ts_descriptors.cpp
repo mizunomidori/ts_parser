@@ -1172,7 +1172,6 @@ bool EventGroupDescriptor::parse(const uint8_t* p)
 	return true;
 }
 
-// 霑ｴ・ｾ陜ｨ・ｨ隴鯉ｽ･闔牙･・2038陝ｷ・ｴ4隴寤22隴鯉ｽ･邵ｺ・ｾ邵ｺ・ｧ髯ｦ・ｨ霑ｴ・ｾ陷ｿ・ｯ髢ｭ・ｽ
 auto MJD_to_JTC2(uint16_t MJD)
 {
 	auto Y_prime = (int)((MJD - 15078.2) / 365.25);
@@ -1877,270 +1876,270 @@ bool Descriptor::decode(const uint8_t* data, const uint16_t data_size)
 		DescriptorData desc;
 		bool success;
 
-		const auto& descriptor_tag = data[decode_size];
+		desc.descriptor_tag = data[decode_size];
 		const auto& descriptor_length = data[decode_size + 1];
 		//fprintf(stderr, "desc_tag: %02x, length: %4d -now: %4d, entire: %4d\n", descriptor_tag, descriptor_length, decode_size, data_size);
 
-		switch (descriptor_tag) {
+		switch (desc.descriptor_tag) {
 		case 0x00:
 		case 0x01:
 			// Reserved
 			success = false;
 			break;
 		case 0x02:
-			desc.video_stream = std::make_unique<VideoStreamDescriptor>();
+			desc.video_stream = std::make_shared<VideoStreamDescriptor>();
 			success = desc.video_stream->parse(data + decode_size);
 			break;
 		case 0x03:
-			desc.audio_stream = std::make_unique<AudioStreamDescriptor>();
+			desc.audio_stream = std::make_shared<AudioStreamDescriptor>();
 			success = desc.audio_stream->parse(data + decode_size);
 			break;
 		case 0x04:
-			desc.hierarchy = std::make_unique<HierarchyDescriptor>();
+			desc.hierarchy = std::make_shared<HierarchyDescriptor>();
 			success = desc.hierarchy->parse(data + decode_size);
 			break;
 		case 0x05:
-			desc.registration = std::make_unique<RegistrationDescriptor>();
+			desc.registration = std::make_shared<RegistrationDescriptor>();
 			success = desc.registration->parse(data + decode_size);
 			break;
 		case 0x06:
-			desc.data_stream = std::make_unique<DataStreamAlignmentDescriptor>();
+			desc.data_stream = std::make_shared<DataStreamAlignmentDescriptor>();
 			success = desc.data_stream->parse(data + decode_size);
 			break;
 		case 0x07:
-			desc.target_bk_grid = std::make_unique<TargetBackgroundGridDescriptor>();
+			desc.target_bk_grid = std::make_shared<TargetBackgroundGridDescriptor>();
 			success = desc.target_bk_grid->parse(data + decode_size);
 			break;
 		case 0x08:
-			desc.video_window = std::make_unique<VideoWindowDescriptor>();
+			desc.video_window = std::make_shared<VideoWindowDescriptor>();
 			success = desc.video_window->parse(data + decode_size);
 			break;
 		case 0x09:
-			desc.CA = std::make_unique<CADescriptor>();
+			desc.CA = std::make_shared<CADescriptor>();
 			success = desc.CA->parse(data + decode_size);
 			break;
 		case 0x0A:
-			desc.ISO_639_language = std::make_unique<ISO639LanguageDescriptor>();
+			desc.ISO_639_language = std::make_shared<ISO639LanguageDescriptor>();
 			success = desc.ISO_639_language->parse(data + decode_size);
 			break;
 		case 0x0B:
-			desc.sys_clock = std::make_unique<SystemClockDescriptor>();
+			desc.sys_clock = std::make_shared<SystemClockDescriptor>();
 			success = desc.sys_clock->parse(data + decode_size);
 			break;
 		case 0x0C:
-			desc.mpx_buf_util = std::make_unique<MultiplexBufferUtilizationDescriptor>();
+			desc.mpx_buf_util = std::make_shared<MultiplexBufferUtilizationDescriptor>();
 			success = desc.mpx_buf_util->parse(data + decode_size);
 			break;
 		case 0x0D:
-			desc.carousel= std::make_unique<CarouselCompatibleCompositeDescriptor>();
+			desc.carousel= std::make_shared<CarouselCompatibleCompositeDescriptor>();
 			success = desc.carousel->parse(data + decode_size);
 			break;
 		case 0x0E:
-			desc.max_bitrate = std::make_unique<MaximumBitrateDescriptor>();
+			desc.max_bitrate = std::make_shared<MaximumBitrateDescriptor>();
 			success = desc.max_bitrate->parse(data + decode_size);
 			break;
 		case 0x1C:
-			desc.MPEG4_audio = std::make_unique<MPEG4AudioDescriptor>();
+			desc.MPEG4_audio = std::make_shared<MPEG4AudioDescriptor>();
 			success = desc.MPEG4_audio->parse(data + decode_size);
 			break;
 		case 0x28:
-			desc.AVC_video = std::make_unique<AVCVideoDescriptor>();
+			desc.AVC_video = std::make_shared<AVCVideoDescriptor>();
 			success = desc.AVC_video->parse(data + decode_size);
 			break;
 		case 0x2A:
-			desc.AVC_timing = std::make_unique<AVCTimingAndHRFDescriptor>();
+			desc.AVC_timing = std::make_shared<AVCTimingAndHRFDescriptor>();
 			success = desc.AVC_timing->parse(data + decode_size);
 			break;
 		case 0x2E:
-			desc.MPEG4_audio_ext = std::make_unique<MPEG4AudioExtensionDescriptor>();
+			desc.MPEG4_audio_ext = std::make_shared<MPEG4AudioExtensionDescriptor>();
 			success = desc.MPEG4_audio_ext->parse(data + decode_size);
 			break;
 		case 0x38:
-			desc.HEVC = std::make_unique<HEVCDescriptor>();
+			desc.HEVC = std::make_shared<HEVCDescriptor>();
 			success = desc.HEVC->parse(data + decode_size);
 			break;
 		case 0x40:
-			desc.network_name = std::make_unique<NetworkNameDescriptor>();
+			desc.network_name = std::make_shared<NetworkNameDescriptor>();
 			success = desc.network_name->parse(data + decode_size);
 			break;
 		case 0x41:
-			desc.service_list = std::make_unique<ServiceListDescriptor>();
+			desc.service_list = std::make_shared<ServiceListDescriptor>();
 			success = desc.service_list->parse(data + decode_size);
 			break;
 		case 0x42:
-			desc.stuffing = std::make_unique<SttuffingDescriptor>();
+			desc.stuffing = std::make_shared<SttuffingDescriptor>();
 			success = desc.stuffing->parse(data + decode_size);
 			break;
 		case 0x43:
-			desc.satelite = std::make_unique<SateliteDeliverySystemDescriptor>();
+			desc.satelite = std::make_shared<SateliteDeliverySystemDescriptor>();
 			success = desc.satelite->parse(data + decode_size);
 			break;
 		case 0x47:
-			desc.bouquet_name = std::make_unique<BouquetNameDescriptor>();
+			desc.bouquet_name = std::make_shared<BouquetNameDescriptor>();
 			success = desc.bouquet_name->parse(data + decode_size);
 			break;
 		case 0x48:
-			desc.service = std::make_unique<ServiceDescriptor>();
+			desc.service = std::make_shared<ServiceDescriptor>();
 			success = desc.service->parse(data + decode_size);
 			break;
 		case 0x49:
-			desc.country = std::make_unique<CountryAvailabilityDescriptor>();
+			desc.country = std::make_shared<CountryAvailabilityDescriptor>();
 			success = desc.country->parse(data + decode_size);
 			break;
 		case 0x4A:
-			desc.link = std::make_unique<LinkageDescriptor>();
+			desc.link = std::make_shared<LinkageDescriptor>();
 			success = desc.link->parse(data + decode_size);
 			break;
 		case 0x4B:
-			desc.NVOD_ref = std::make_unique<NVODReferenceDescriptor>();
+			desc.NVOD_ref = std::make_shared<NVODReferenceDescriptor>();
 			success = desc.NVOD_ref->parse(data + decode_size);
 			break;
 		case 0x4C:
-			desc.time_shifted_service = std::make_unique<TimeShiftedServiceDescriptor>();
+			desc.time_shifted_service = std::make_shared<TimeShiftedServiceDescriptor>();
 			success = desc.time_shifted_service->parse(data + decode_size);
 			break;
 		case 0x4D:
-			desc.short_event = std::make_unique<ShortEventDescriptor>();
+			desc.short_event = std::make_shared<ShortEventDescriptor>();
 			success = desc.short_event->parse(data + decode_size);
 			break;
 		case 0x4E:
-			desc.ext_event = std::make_unique<ExtendedEventDescriptor>();
+			desc.ext_event = std::make_shared<ExtendedEventDescriptor>();
 			success = desc.ext_event->parse(data + decode_size);
 			break;
 		case 0x4F:
-			desc.time_shifted_event = std::make_unique<TimeShiftedEventDescriptor>();
+			desc.time_shifted_event = std::make_shared<TimeShiftedEventDescriptor>();
 			success = desc.time_shifted_event->parse(data + decode_size);
 			break;
 		case 0x50:
-			desc.component = std::make_unique<ComponentDescriptor>();
+			desc.component = std::make_shared<ComponentDescriptor>();
 			success = desc.component->parse(data + decode_size);
 			break;
 		case 0x51:
-			desc.mosaic = std::make_unique<MosaicDescriptor>();
+			desc.mosaic = std::make_shared<MosaicDescriptor>();
 			success = desc.mosaic->parse(data + decode_size);
 			break;
 		case 0x52:
-			desc.stream_id = std::make_unique<StreamIdentifierDescriptor>();
+			desc.stream_id = std::make_shared<StreamIdentifierDescriptor>();
 			success = desc.stream_id->parse(data + decode_size);
 			break;
 		case 0x53:
-			desc.CA_id = std::make_unique<CAIdentifierDescriptor>();
+			desc.CA_id = std::make_shared<CAIdentifierDescriptor>();
 			success = desc.CA_id->parse(data + decode_size);
 			break;
 		case 0x54:
-			desc.content = std::make_unique<ContentDescriptor>();
+			desc.content = std::make_shared<ContentDescriptor>();
 			success = desc.content->parse(data + decode_size);
 			break;
 		case 0x55:
-			desc.parental_rating = std::make_unique<ParentalRatingDescriptor>();
+			desc.parental_rating = std::make_shared<ParentalRatingDescriptor>();
 			success = desc.parental_rating->parse(data + decode_size);
 			break;
 		case 0x58:
-			desc.local_time_offset = std::make_unique<LocalTimeOffsetDescriptor>();
+			desc.local_time_offset = std::make_shared<LocalTimeOffsetDescriptor>();
 			success = desc.local_time_offset->parse(data + decode_size);
 			break;
 		case 0x66:
-			desc.data_broadcast_id = std::make_unique<DataBroadcastIdDescriptor>();
+			desc.data_broadcast_id = std::make_shared<DataBroadcastIdDescriptor>();
 			success = desc.data_broadcast_id->parse(data + decode_size);
 			break;
 		case 0x68:
-			desc.hybrid = std::make_unique<HybridInformationDescriptor>();
+			desc.hybrid = std::make_shared<HybridInformationDescriptor>();
 			success = desc.hybrid->parse(data + decode_size);
 			break;
 		case 0xC0:
-			desc.hierarchical_trans = std::make_unique<HierarchicalTransmissionDescriptor>();
+			desc.hierarchical_trans = std::make_shared<HierarchicalTransmissionDescriptor>();
 			success = desc.hierarchical_trans->parse(data + decode_size);
 			break;
 		case 0xC1:
-			desc.digital_copy_ctrl = std::make_unique<DigitalCopyControlDescriptor>();
+			desc.digital_copy_ctrl = std::make_shared<DigitalCopyControlDescriptor>();
 			success = desc.digital_copy_ctrl->parse(data + decode_size);
 			break;
 		case 0xC4:
-			desc.audio_component = std::make_unique<AudioComponentDescriptor>();
+			desc.audio_component = std::make_shared<AudioComponentDescriptor>();
 			success = desc.audio_component->parse(data + decode_size);
 			break;
 		case 0xC5:
-			desc.hyperlink = std::make_unique<HyperlinkDescriptor>();
+			desc.hyperlink = std::make_shared<HyperlinkDescriptor>();
 			success = desc.hyperlink->parse(data + decode_size);
 			break;
 		case 0xC6:
-			desc.target_region = std::make_unique<TargetRegionDescriptor>();
+			desc.target_region = std::make_shared<TargetRegionDescriptor>();
 			success = desc.target_region->parse(data + decode_size);
 			break;
 		case 0xC7:
-			desc.data_content = std::make_unique<DataContentDescriptor>();
+			desc.data_content = std::make_shared<DataContentDescriptor>();
 			success = desc.data_content->parse(data + decode_size);
 			break;
 		case 0xC8:
-			desc.video_dec_ctrl = std::make_unique<VideoDecodeControlDescriptor>();
+			desc.video_dec_ctrl = std::make_shared<VideoDecodeControlDescriptor>();
 			success = desc.video_dec_ctrl->parse(data + decode_size);
 			break;
 		case 0xCD:
-			desc.TS_info = std::make_unique<TSInformationDescriptor>();
+			desc.TS_info = std::make_shared<TSInformationDescriptor>();
 			success = desc.TS_info->parse(data + decode_size);
 			break;
 		case 0xCE:
-			desc.ext_broadcaster = std::make_unique<ExtendedBroadcasterDescriptor>();
+			desc.ext_broadcaster = std::make_shared<ExtendedBroadcasterDescriptor>();
 			success = desc.ext_broadcaster->parse(data + decode_size);
 			break;
 		case 0xCF:
-			desc.logo_trans = std::make_unique<LogoTransmissionDescriptor>();
+			desc.logo_trans = std::make_shared<LogoTransmissionDescriptor>();
 			success = desc.logo_trans->parse(data + decode_size);
 			break;
 		case 0xD5:
-			desc.series = std::make_unique<SeriesDescriptor>();
+			desc.series = std::make_shared<SeriesDescriptor>();
 			success = desc.series->parse(data + decode_size);
 			break;
 		case 0xD6:
-			desc.event_group = std::make_unique<EventGroupDescriptor>();
+			desc.event_group = std::make_shared<EventGroupDescriptor>();
 			success = desc.event_group->parse(data + decode_size);
 			break;
 		case 0xD7:
-			desc.SI_param = std::make_unique<SIParameterDescriptor>();
+			desc.SI_param = std::make_shared<SIParameterDescriptor>();
 			success = desc.SI_param->parse(data + decode_size);
 			break;
 		case 0xD8:
-			desc.broadcaster_name = std::make_unique<BroadcasterNameDescriptor>();
+			desc.broadcaster_name = std::make_shared<BroadcasterNameDescriptor>();
 			success = desc.broadcaster_name->parse(data + decode_size);
 			break;
 		case 0xD9:
-			desc.component_group = std::make_unique<ComponentGroupDescriptor>();
+			desc.component_group = std::make_shared<ComponentGroupDescriptor>();
 			success = desc.component_group->parse(data + decode_size);
 			break;
 		case 0xDA:
-			desc.SI_prime_ts = std::make_unique<SIPrimeTsDescriptor>();
+			desc.SI_prime_ts = std::make_shared<SIPrimeTsDescriptor>();
 			success = desc.SI_prime_ts->parse(data + decode_size);
 			break;
 		case 0xDB:
-			desc.board_info = std::make_unique<BoardInformationDescriptor>();
+			desc.board_info = std::make_shared<BoardInformationDescriptor>();
 			success = desc.board_info->parse(data + decode_size);
 			break;
 		case 0xDC:
-			desc.LDT_link = std::make_unique<LDTLinkageDescriptor>();
+			desc.LDT_link = std::make_shared<LDTLinkageDescriptor>();
 			success = desc.LDT_link->parse(data + decode_size);
 			break;
 		case 0xE0:
-			desc.service_group = std::make_unique<ServiceGroupDescriptor>();
+			desc.service_group = std::make_shared<ServiceGroupDescriptor>();
 			success = desc.service_group->parse(data + decode_size);
 			break;
 		case 0xE1:
-			desc.area = std::make_unique<AreaBroadcastingInformationDescriptor>();
+			desc.area = std::make_shared<AreaBroadcastingInformationDescriptor>();
 			success = desc.area->parse(data + decode_size);
 			break;
 		case 0xF6:
-			desc.access_ctrl = std::make_unique<AccessControlDescriptor>();
+			desc.access_ctrl = std::make_shared<AccessControlDescriptor>();
 			success = desc.access_ctrl->parse(data + decode_size);
 			break;
 		case 0xFB:
-			desc.partial_reception = std::make_unique<PartialReceptionDescriptor>();
+			desc.partial_reception = std::make_shared<PartialReceptionDescriptor>();
 			success = desc.partial_reception->parse(data + decode_size);
 			break;
 		case 0xFC:
-			desc.emergency = std::make_unique<EmergencyInformationDescriptor>();
+			desc.emergency = std::make_shared<EmergencyInformationDescriptor>();
 			success = desc.emergency->parse(data + decode_size);
 			break;
 		case 0xFE:
-			desc.system_management = std::make_unique<SystemManagementDescriptor>();
+			desc.system_management = std::make_shared<SystemManagementDescriptor>();
 			success = desc.system_management->parse(data + decode_size);
 			break;
 		default:

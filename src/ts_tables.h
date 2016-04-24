@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include "ts_descriptors.h"
 
 // PSI: PAT, PMT, NIT, CAT, TSDT, ICIT
 // SI: BIT, SDT, EIT, TDT, TOT
@@ -24,9 +25,9 @@ struct ProgramAssociationSection
 	uint8_t  section_number;
 	uint8_t  last_section_number;
 
+	std::vector<uint16_t> network_PIDs;
 	std::vector<PMTInfo> PMT_list;
-	std::vector<uint16_t> network_PID;
-	std::vector<uint16_t> program_map_PID;
+	//std::vector<uint16_t> program_map_PIDs;
 
 	ProgramAssociationSection() = default;
 	~ProgramAssociationSection() = default;
@@ -44,6 +45,8 @@ struct CASection
 	int8_t   current_next_indicator;
 	uint8_t  section_number;
 	uint8_t  last_section_number;
+
+	Descriptor descriptors;
 
 	CASection() = default;
 	~CASection() = default;
@@ -90,6 +93,7 @@ struct ProgramMapSection
 		uint8_t  stream_type;
 		uint16_t elementary_PID;
 		uint16_t ES_info_length;
+		Descriptor descriptors2;
 	};
 
 	uint8_t  table_id;
@@ -104,6 +108,7 @@ struct ProgramMapSection
 
 	uint16_t PCR_PID;
 	uint16_t program_info_length;
+	Descriptor descriptors;
 
 	std::vector<ESInfo>  ES_list;
 
@@ -155,6 +160,7 @@ struct NetworkInformationSection
 		uint16_t transport_stream_id;
 		uint16_t original_network_id;
 		uint16_t transport_descriptors_length;
+		Descriptor transport_descriptors;
 	};
 
 	uint8_t  table_id;
@@ -167,6 +173,7 @@ struct NetworkInformationSection
 	uint8_t  section_number;
 	uint8_t  last_section_number;
 	uint16_t network_descriptors_length;
+	Descriptor network_descriptors;
 
 	uint16_t transport_stream_loop_length;
 	std::vector<TSInfo> TS_list;
@@ -184,6 +191,7 @@ struct BouquetAssociationSection
 		uint16_t transport_stream_id;
 		uint16_t original_network_id;
 		uint16_t transport_descriptors_length;
+		Descriptor transport_descriptors;
 	};
 
 	uint8_t  table_id;
@@ -196,6 +204,7 @@ struct BouquetAssociationSection
 	uint8_t  section_number;
 	uint8_t  last_section_number;
 	uint16_t bouquet_descriptors_length;
+	Descriptor bouquet_descriptors;
 
 	uint16_t transport_stream_loop_length;
 	std::vector<TSInfo> TS_list;
@@ -216,6 +225,7 @@ struct ServiceDescriptionSection
 		uint8_t  running_status;
 		uint8_t  free_CA_mode;
 		uint16_t descriptors_loop_length;
+		Descriptor descriptors;
 	};
 
 	uint8_t  table_id;
@@ -242,11 +252,14 @@ struct EventInformationSection
 {
 	struct EventInfo {
 		uint16_t event_id;
-		int64_t  start_time;
-		uint32_t duration;
+		//int64_t  start_time;
+		struct tm start_time;
+		//uint32_t duration;
+		struct tm duration;
 		uint8_t  running_status;
 		int8_t   free_CA_mode;
 		uint16_t descriptors_loop_length;
+		Descriptor descriptors;
 	};
 
 	uint8_t  table_id;
@@ -294,6 +307,7 @@ struct TimeOffsetSection
 
 	struct tm JST_time;
 	uint16_t descriptors_loop_length;
+	Descriptor descriptors;
 
 	TimeOffsetSection() = default;
 	~TimeOffsetSection() = default;
@@ -307,6 +321,7 @@ struct BroadcasterInformationSection
 	struct BroadcasterInfo {
 		uint8_t  broadcaster_id;
 		uint16_t broadcaster_descriptors_length;
+		Descriptor broadcaster_descriptors;
 	};
 	uint8_t  table_id;
 	int8_t   section_syntax_indicator;
@@ -320,6 +335,7 @@ struct BroadcasterInformationSection
 
 	int8_t   broadcast_view_propriety;
 	uint16_t first_descriptors_length;
+	Descriptor first_descriptors;
 
 	std::vector<BroadcasterInfo> broadcaster_info_list;
 
@@ -327,24 +343,6 @@ struct BroadcasterInformationSection
 	~BroadcasterInformationSection() = default;
 
 	bool parse(const uint8_t* p, uint16_t* read_length);
-};
-
-enum class TableID
-{
-	PAT            = 0x00,
-	CAT            = 0x01,
-	PMT            = 0x02,
-	TSDT           = 0x03,
-	NIT_actual     = 0x40,
-	NIT_other      = 0x41,
-	SDT_actual     = 0x42,
-	SDT_other      = 0x46,
-	BAT            = 0x4A,
-	EIT_pf_actual  = 0x4E,
-	EIT_pf_other   = 0x4F,
-	TDT            = 0x70,
-	TOT            = 0x73,
-	BIT            = 0xC4,
 };
 
 struct TableData
@@ -360,8 +358,6 @@ struct TableData
 	std::unique_ptr<TimeDateSection>               TDT;
 	std::unique_ptr<TimeOffsetSection>             TOT;
 	std::unique_ptr<BroadcasterInformationSection> BIT;
-
-	TableID id;
 
 	TableData() :
 		PAT(nullptr),
@@ -385,7 +381,6 @@ public:
 	PsiTable() = default;
 	virtual ~PsiTable() = default;
 
-private:
 	std::vector<uint8_t> table_id_list;
 	std::vector<TableData> table_list;
 };

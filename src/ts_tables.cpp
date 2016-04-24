@@ -4,7 +4,6 @@
  */
 
 #include "ts_tables.h"
-#include "ts_descriptors.h"
 #include "crc32.h"
 #include "ts_common_utils.h"
 
@@ -51,6 +50,9 @@ bool ProgramAssociationSection::parse(const uint8_t* p, uint16_t* read_length)
 	}
 	section_number         = p[6];
 	last_section_number    = p[7];
+	if (section_number != 0) {
+		return false; // ARIB TR-B14
+	}
 
 	p += 8;
 	const auto rest_section_length = section_length - (5 + crc::CRC32_SIZE);
@@ -60,13 +62,13 @@ bool ProgramAssociationSection::parse(const uint8_t* p, uint16_t* read_length)
 		const uint16_t program_number_ = (p[i] << 8) | p[i + 1];
 		if (program_number_ == 0x00) {
 			const uint16_t network_PID_ = (p[i + 2] & 0x1f) << 8 | p[i + 3];
-			network_PID.push_back(network_PID_);
+			network_PIDs.push_back(network_PID_);
 		}
 		else {
 			const uint16_t program_map_PID_ = (p[i + 2] & 0x1f) << 8 | p[i + 3];
 			auto duplicate_flag = false;
-			for (auto pid : program_map_PID) {
-				if (pid == program_map_PID_)
+			for (auto pid : PMT_list) {
+				if (pid.program_map_PID == program_map_PID_)
 					duplicate_flag = true;
 			}
 			if (!duplicate_flag) {
@@ -106,12 +108,14 @@ bool CASection::parse(const uint8_t* p, uint16_t* read_length)
 	}
 	section_number = p[6];
 	last_section_number = p[7];
+	if (section_number != 0) {
+		return false; // ARIB TR-B14
+	}
 
 	const auto descriptor_length = section_length - crc::CRC32_SIZE - 5;
 	// descriptor()
 	if (descriptor_length) {
-		Descriptor desc;
-		desc.decode(&p[8], descriptor_length);
+		descriptors.decode(&p[8], descriptor_length);
 	}
 
 	return true;
@@ -198,6 +202,9 @@ bool ProgramMapSection::parse(const uint8_t* p, uint16_t* read_length)
 	}
 	section_number = p[6];
 	last_section_number = p[7];
+	if (section_number != 0) {
+		return false; // ARIB TR-B14
+	}
 
 	PCR_PID = (p[8] & 0x1f) << 8 | p[9];
 	program_info_length = (p[10] & 0x0f) << 8 | p[11];
@@ -205,8 +212,7 @@ bool ProgramMapSection::parse(const uint8_t* p, uint16_t* read_length)
 
 	// descriptor()
 	if (program_info_length) {
-		Descriptor desc;
-		desc.decode(p, program_info_length);
+		descriptors.decode(p, program_info_length);
 	}
 
 	p += program_info_length;
@@ -217,8 +223,6 @@ bool ProgramMapSection::parse(const uint8_t* p, uint16_t* read_length)
 		info.elementary_PID = (p[i + 1] & 0x1f) << 8 | p[i + 2];
 		info.ES_info_length = (p[i + 3] & 0x0f) << 8 | p[i + 4];
 
-		ES_list.push_back(info);
-
 		auto pid_type = get_stream_type(info.stream_type);
 		//fprintf(stderr, "pid_type: %s\n", pid_type.c_str());
 		//fprintf(stderr, "stream_type: %x\n", info.stream_type);
@@ -226,9 +230,10 @@ bool ProgramMapSection::parse(const uint8_t* p, uint16_t* read_length)
 
 		// descriptor()
 		if (info.ES_info_length) {
-			Descriptor desc2;
-			desc2.decode(&p[i + 5], info.ES_info_length);
+			info.descriptors2.decode(&p[i + 5], info.ES_info_length);
 		}
+
+		ES_list.push_back(info);
 
 		i += 5 + info.ES_info_length;
 	}
@@ -342,8 +347,7 @@ bool NetworkInformationSection::parse(const uint8_t* p, uint16_t* read_length)
 
 	// descriptor()
 	if (network_descriptors_length) {
-		Descriptor desc;
-		desc.decode(p, network_descriptors_length);
+		network_descriptors.decode(p, network_descriptors_length);
 	}
 
 	p += network_descriptors_length;
@@ -357,13 +361,12 @@ bool NetworkInformationSection::parse(const uint8_t* p, uint16_t* read_length)
 		info.original_network_id = p[i + 2] << 8 | p[i + 3];
 		info.transport_descriptors_length = (p[i + 4] & 0x0f) << 8 | p[i + 5];
 
-		TS_list.push_back(info);
-
 		// descriptor()
 		if (info.transport_descriptors_length) {
-			Descriptor desc;
-			desc.decode(&p[i + 6], info.transport_descriptors_length);
+			info.transport_descriptors.decode(&p[i + 6], info.transport_descriptors_length);
 		}
+
+		TS_list.push_back(info);
 
 		i += 6 + info.transport_descriptors_length;
 	}
@@ -407,8 +410,7 @@ bool BouquetAssociationSection::parse(const uint8_t* p, uint16_t* read_length)
 
 	// descriptor()
 	if (bouquet_descriptors_length) {
-		Descriptor desc;
-		desc.decode(p, bouquet_descriptors_length);
+		bouquet_descriptors.decode(p, bouquet_descriptors_length);
 	}
 
 	p += bouquet_descriptors_length;
@@ -423,28 +425,18 @@ bool BouquetAssociationSection::parse(const uint8_t* p, uint16_t* read_length)
 		info.transport_descriptors_length =
 			(p[i + 4] & 0x0f) << 8 | p[i + 5];
 
-		TS_list.push_back(info);
-
 		// descriptor()
 		if (info.transport_descriptors_length) {
-			Descriptor desc;
-			desc.decode(&p[i + 6], info.transport_descriptors_length);
+			info.transport_descriptors.decode(&p[i + 6], info.transport_descriptors_length);
 		}
+
+		TS_list.push_back(info);
 
 		i += 6 + info.transport_descriptors_length;
 	}
 
 	return true;
 }
-
-enum class RunnigStatus
-{
-	UNDEFINED  = 0,
-	NOT_RUNNIG = 1,
-	START      = 2,
-	STOP       = 3,
-	RUNNIG     = 4,
-};
 
 /* ARIB STD-B10v5_7 */
 bool ServiceDescriptionSection::parse(const uint8_t* p, uint16_t* read_length)
@@ -486,15 +478,16 @@ bool ServiceDescriptionSection::parse(const uint8_t* p, uint16_t* read_length)
 		info.EIT_user_defined_flags     = (p[i + 2] & 0x1c) >> 2;
 		info.EIT_schedule_flag          = (p[i + 2] & 0x02) >> 1;
 		info.EIT_present_following_flag =  p[i + 2] & 0x01;
-		info.running_status             = (p[i + 3] & 0xe0) >> 5;
+		info.running_status             = (p[i + 3] & 0xe0) >> 5; // 0x0: reserved
 		info.free_CA_mode               = (p[i + 3] & 0x10) >> 4;
 		info.descriptors_loop_length    = (p[i + 3] & 0x0f) << 8 | p[i + 4];
 
-		service_info_list.push_back(info);
-
 		// descriptor
-		Descriptor desc;
-		desc.decode(&p[i + 5], info.descriptors_loop_length);
+		if (info.descriptors_loop_length) {
+			info.descriptors.decode(&p[i + 5], info.descriptors_loop_length);
+		}
+
+		service_info_list.push_back(info);
 
 		i += 5 + info.descriptors_loop_length;
 	}
@@ -543,25 +536,31 @@ bool EventInformationSection::parse(const uint8_t* p, uint16_t* read_length)
 	for (auto i = 0; i < rest_section_length;) {
 		EventInfo info;
 		info.event_id   = read_bits<uint16_t>(&p[i], 0, 16);
-		info.start_time = read_bits<int64_t> (&p[i + 2], 0, 40);
-		info.duration   = read_bits<uint32_t>(&p[i + 7], 0, 24);
-		if (info.duration == 0xFFFFFF) {
+
+		//info.start_time = read_bits<int64_t> (&p[i + 2], 0, 40);
+		info.start_time         = MJD_to_JTC(read_bits<uint16_t>(&p[i + 2], 0, 16));
+		info.start_time.tm_hour = BCD_to_dec<int>(&p[i + 4], 2);
+		info.start_time.tm_min  = BCD_to_dec<int>(&p[i + 5], 2);
+		info.start_time.tm_sec  = BCD_to_dec<int>(&p[i + 6], 2);
+
+		const auto duration = read_bits<uint32_t>(&p[i + 7], 0, 24);
+		if (duration == 0xFFFFFF) {
 			//fprintf(stderr, "duration: undef.\n");
 		}
-		info.running_status = read_bits<uint8_t>(&p[i + 10], 0, 3);
+		info.duration.tm_hour = BCD_to_dec<int>(&p[i + 7], 2);
+		info.duration.tm_min  = BCD_to_dec<int>(&p[i + 8], 2);
+		info.duration.tm_sec  = BCD_to_dec<int>(&p[i + 9], 2);
+
+		info.running_status = read_bits<uint8_t>(&p[i + 10], 0, 3); // 0x0: reserved
 		info.free_CA_mode   = read_bits<int8_t>(&p[i + 10], 3, 1);
 		info.descriptors_loop_length = read_bits<uint16_t>(&p[i + 10], 4, 12);
 
-		event_info_list.push_back(info);
-
-		//const auto mjd = MJD_to_JTC(read_bits<uint16_t>(&p[i + 2], 0, 16));
-		//const auto jtc = BCD_to_dec<uint32_t>(&p[i + 4], 6);
-		//const auto dur = BCD_to_dec<uint32_t>(reinterpret_cast<uint8_t*>(&info.duration), 6);
-		//fprintf(stderr, "start: %08d %08d, duration: %06d\n", mjd, jtc, dur);
-
 		// descriptor
-		Descriptor desc;
-		desc.decode(&p[i + 12], info.descriptors_loop_length);
+		if (info.descriptors_loop_length) {
+			info.descriptors.decode(&p[i + 12], info.descriptors_loop_length);
+		}
+
+		event_info_list.push_back(info);
 
 		i += 12 + info.descriptors_loop_length;
 	}
@@ -632,8 +631,7 @@ bool TimeOffsetSection::parse(const uint8_t* p, uint16_t* read_length)
 
 	// descriptor()
 	if (descriptors_loop_length) {
-		Descriptor desc;
-		desc.decode(&p[10], descriptors_loop_length);
+		descriptors.decode(&p[10], descriptors_loop_length);
 	}
 
 	return true;
@@ -676,8 +674,7 @@ bool BroadcasterInformationSection::parse(const uint8_t* p, uint16_t* read_lengt
 
 	// descriptor()
 	if (first_descriptors_length) {
-		Descriptor desc;
-		desc.decode(p, first_descriptors_length);
+		first_descriptors.decode(p, first_descriptors_length);
 	}
 
 	p += first_descriptors_length;
@@ -688,13 +685,12 @@ bool BroadcasterInformationSection::parse(const uint8_t* p, uint16_t* read_lengt
 		info.broadcaster_id = p[i];
 		info.broadcaster_descriptors_length = (p[i + 1] & 0x0f) << 8 | p[i + 2];
 
-		broadcaster_info_list.push_back(info);
-
 		// descriptor()
 		if (info.broadcaster_descriptors_length) {
-			Descriptor desc;
-			desc.decode(&p[i + 3], info.broadcaster_descriptors_length);
+			info.broadcaster_descriptors.decode(&p[i + 3], info.broadcaster_descriptors_length);
 		}
+
+		broadcaster_info_list.push_back(info);
 
 		i += 3 + info.broadcaster_descriptors_length;
 	}
