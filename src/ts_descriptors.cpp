@@ -9,6 +9,17 @@
 #include "ts_common_utils.h"
 #include "char_decoder.h"
 
+static inline std::string dec_text(const uint8_t* p, const uint16_t char_length)
+{
+	static CharDecoder cdec;
+	static std::vector<uint8_t> chars;
+
+	chars.assign(p, p + char_length);
+	chars.push_back('\0');
+
+	return cdec.decode(chars.data(), char_length);
+}
+
 // ITU-T Rec. H.222.0
 bool VideoStreamDescriptor::parse(const uint8_t* p)
 {
@@ -249,7 +260,7 @@ bool BouquetNameDescriptor::parse(const uint8_t* p)
 		return false;
 	}
 
-	bouquet_name_chars.assign(p, p + descriptor_length);
+	bouquet_name_chars = dec_text(p, descriptor_length);
 
 	return true;
 }
@@ -291,7 +302,7 @@ bool ComponentDescriptor::parse(const uint8_t* p)
 	ISO_639_language_code = (*p << 16) | (*(p + 1) << 8) | *(p + 2);
 	p += 3;
 
-	text_chars.assign(p, p + descriptor_length - 6);
+	text_chars = dec_text(p, descriptor_length);
 
 	// test
 	//for (auto& component : component_table) {
@@ -408,26 +419,26 @@ bool ExtendedEventDescriptor::parse(const uint8_t* p)
 	ISO_639_language_code = *p << 16 | *(p + 1) << 8 | *(p + 2);
 	p += 3;
 	length_of_items = *p++;
+
 	for (int i = 0; i < length_of_items;) {
 		ItemData item;
 		item.item_description_length = *p++;
-		item.item_description_chars.resize(item.item_description_length);
-		for (auto c : item.item_description_chars) {
-			c = *p++;
-		}
+
+		item.item_description_chars = dec_text(p, item.item_description_length);
+		p += item.item_description_length;
 
 		item.item_length = *p++;
-		item.item_chars.resize(item.item_length);
-		for (auto c : item.item_chars) {
-			c = *p++;
-		}
+
+		item.item_chars = dec_text(p, item.item_length);
+		p += item.item_length;
+
 		item_list.push_back(item);
 
-		i += 1 + item.item_description_length + item.item_length;
+		i += 2 + item.item_description_length + item.item_length;
 	}
 
 	text_length = *p++;
-	text_chars.assign(p, p + text_length);
+	text_chars = dec_text(p, text_length);
 
 	return true;
 }
@@ -509,9 +520,6 @@ bool MosaicDescriptor::parse(const uint8_t* p)
 		cell_list.push_back(cell);
 	}
 
-	text_length = *p++;
-	text_chars.assign(p, p + text_length);
-
 	return true;
 }
 
@@ -554,7 +562,8 @@ bool NetworkNameDescriptor::parse(const uint8_t* p)
 		return false;
 	}
 
-	network_name_chars.assign(p, p + descriptor_length);
+	network_name_chars = dec_text(p, descriptor_length);
+	//fprintf(stderr, "%s\n", network_name_chars.c_str());
 
 	return true;
 }
@@ -595,12 +604,11 @@ bool ServiceDescriptor::parse(const uint8_t* p)
 	service_type = *p++;
 	service_provider_name_length = *p++;
 
-	service_provider_name_chars.assign(
-		p, p + service_provider_name_length);
+	service_provider_name_chars = dec_text(p, service_provider_name_length);
 	p += service_provider_name_length;
 
 	service_name_length = *p++;
-	service_name_chars.assign(p, p + service_name_length);
+	service_name_chars = dec_text(p, service_name_length);
 
 	return true;
 }
@@ -646,18 +654,12 @@ bool ShortEventDescriptor::parse(const uint8_t* p)
 
 	event_name_length = *p++;
 
-	event_name_chars.assign(p, p + event_name_length);
-	event_name_chars.push_back('\0');
+	event_name_chars = dec_text(p, event_name_length);
 	p += event_name_length;
 
 	text_length = *p++;
 
-	text_chars.assign(p, p + text_length);
-	text_chars.push_back('\0');
-
-	CharDecoder cdec;
-	cdec.decode(&event_name_chars[0], event_name_length);
-	cdec.decode(&text_chars[0], text_length);
+	text_chars = dec_text(p, text_length);
 
 	return true;
 }
@@ -906,7 +908,7 @@ bool AudioComponentDescriptor::parse(const uint8_t* p)
 		p += 3;
 		text_chars_length += 3;
 	}
-	text_chars.assign(p, p + text_chars_length);
+	text_chars = dec_text(p, text_chars_length);
 
 	return true;
 }
@@ -975,14 +977,16 @@ bool HyperlinkDescriptor::parse(const uint8_t* p)
 
 	for (auto i = 0; i < selector_length;) {
 		std::shared_ptr<SelectorData> data;
-		if (link_destination_type == 0x01) { // link_service_info()
+		// link_service_info()
+		if (link_destination_type == 0x01) {
 			data->original_network_id = read_bits<uint16_t>(p, 0, 16);
 			data->transport_stream_id = read_bits<uint16_t>(p + 2, 0, 16);
 			data->service_id          = read_bits<uint16_t>(p + 4, 0, 16);
 			p += 6;
 			i += 6;
 		}
-		else if (link_destination_type == 0x02) { // link_event_info()
+		// link_event_info()
+		else if (link_destination_type == 0x02) {
 			data->original_network_id = read_bits<uint16_t>(p, 0, 16);
 			data->transport_stream_id = read_bits<uint16_t>(p + 2, 0, 16);
 			data->service_id          = read_bits<uint16_t>(p + 4, 0, 16);
@@ -990,7 +994,8 @@ bool HyperlinkDescriptor::parse(const uint8_t* p)
 			p += 8;
 			i += 8;
 		}
-		else if (link_destination_type == 0x03) { // link_module_info()
+		// link_module_info()
+		else if (link_destination_type == 0x03) {
 			data->original_network_id = read_bits<uint16_t>(p, 0, 16);
 			data->transport_stream_id = read_bits<uint16_t>(p + 2, 0, 16);
 			data->service_id          = read_bits<uint16_t>(p + 4, 0, 16);
@@ -1000,7 +1005,8 @@ bool HyperlinkDescriptor::parse(const uint8_t* p)
 			p += 11;
 			i += 11;
 		}
-		else if (link_destination_type == 0x04) {// link_content_info()
+		// link_content_info()
+		else if (link_destination_type == 0x04) {
 			data->original_network_id = read_bits<uint16_t>(p, 0, 16);
 			data->transport_stream_id = read_bits<uint16_t>(p + 2, 0, 16);
 			data->service_id          = read_bits<uint16_t>(p + 4, 0, 16);
@@ -1008,7 +1014,8 @@ bool HyperlinkDescriptor::parse(const uint8_t* p)
 			p += 10;
 			i += 10;
 		}
-		else if (link_destination_type == 0x05) { // link_destination_info()
+		// link_destination_info()
+		else if (link_destination_type == 0x05) {
 			data->original_network_id = read_bits<uint16_t>(p, 0, 16);
 			data->transport_stream_id = read_bits<uint16_t>(p + 2, 0, 16);
 			data->service_id          = read_bits<uint16_t>(p + 4, 0, 16);
@@ -1018,15 +1025,18 @@ bool HyperlinkDescriptor::parse(const uint8_t* p)
 			p += 13;
 			i += 13;
 		}
-		else if (link_destination_type == 0x06) { // link_ert_node_info()
+		// link_ert_node_info()
+		else if (link_destination_type == 0x06) {
 			data->information_provider_id = read_bits<uint16_t>(p, 0, 16);
 			data->event_relation_id       = read_bits<uint16_t>(p + 2, 0, 16);
 			data->node_id                 = read_bits<uint16_t>(p + 4, 0, 16);
 			p += 6;
 			i += 6;
 		}
-		else if (link_destination_type == 0x07) { // link_stored_content_info()
+		// link_stored_content_info()
+		else if (link_destination_type == 0x07) {
 			const auto uri_size = selector_length - i;
+			// Ref. ARIB STD-B24 Part 2 Section 9
 			data->uri_chars.assign(p, p + uri_size);
 			p += uri_size;
 			i += uri_size;
@@ -1128,7 +1138,7 @@ bool SeriesDescriptor::parse(const uint8_t* p)
 	last_episode_number    = read_bits<uint16_t>(p, 4, 12);
 	p += 2;
 
-	series_name_chars.assign(p, p + descriptor_length - 8);
+	series_name_chars = dec_text(p, descriptor_length - 8);
 
 	return true;
 }
@@ -1227,7 +1237,7 @@ bool BroadcasterNameDescriptor::parse(const uint8_t* p)
 		return false;
 	}
 
-	broadcaster_name_chars.assign(p, p + descriptor_length);
+	broadcaster_name_chars = dec_text(p, descriptor_length);
 
 	return true;
 }
@@ -1266,7 +1276,7 @@ bool ComponentGroupDescriptor::parse(const uint8_t* p)
 		}
 		group.text_length = *p++;
 
-		group.text_chars.assign(p, p + group.text_length);
+		group.text_chars = dec_text(p, group.text_length);
 		p += group.text_length;
 	}
 
@@ -1316,13 +1326,12 @@ bool BoardInformationDescriptor::parse(const uint8_t* p)
 		return false;
 	}
 
-	title_length      = *p++;
-	title_chars.resize(title_length);
-	for (auto c : title_chars) {
-		c = *p++;
-	}
-	text_length       = *p++;
-	text_chars.assign(p, p + text_length);
+	title_length = *p++;
+	title_chars = dec_text(p, title_length);
+	p += title_length;
+
+	text_length = *p++;
+	text_chars = dec_text(p, text_length);
 
 	return true;
 }
@@ -1391,7 +1400,7 @@ bool TSInformationDescriptor::parse(const uint8_t* p)
 	remote_control_key_id   = *p++;
 	length_of_ts_name       = read_bits<uint8_t>(p, 0, 6);
 	transmission_type_count = read_bits<uint8_t>(p++, 6, 2);
-	ts_name_chars.assign(p, p + length_of_ts_name);
+	ts_name_chars = dec_text(p, length_of_ts_name);
 	p += length_of_ts_name;
 	TS_info_list.resize(transmission_type_count);
 	for (auto info : TS_info_list) {
@@ -1494,6 +1503,7 @@ bool LogoTransmissionDescriptor::parse(const uint8_t* p)
 		logo_id = read_bits<uint16_t>(p, 7, 9);
 	}
 	else if (logo_transmission_type == 0x03) {
+		// 8-unit code character string
 		logo_chars.assign(p, p + descriptor_length - 1);
 		logo_chars.push_back('\0');
 
@@ -1878,7 +1888,7 @@ bool Descriptor::decode(const uint8_t* data, const uint16_t data_size)
 
 		desc.descriptor_tag = data[decode_size];
 		const auto& descriptor_length = data[decode_size + 1];
-		//fprintf(stderr, "desc_tag: %02x, length: %4d -now: %4d, entire: %4d\n", descriptor_tag, descriptor_length, decode_size, data_size);
+		//fprintf(stderr, "desc_tag: %02x, length: %4d -now: %4d, entire: %4d\n", desc.descriptor_tag, descriptor_length, decode_size, data_size);
 
 		switch (desc.descriptor_tag) {
 		case 0x00:

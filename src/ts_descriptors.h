@@ -3,6 +3,7 @@
 #include <memory>
 #include <array>
 #include <vector>
+#include <string>
 
 struct VideoStreamDescriptor
 {
@@ -161,7 +162,7 @@ struct BouquetNameDescriptor
 {
 	uint8_t descriptor_tag;
 	uint8_t descriptor_length;
-	std::vector<uint8_t> bouquet_name_chars;
+	std::string bouquet_name_chars;
 
 	bool parse(const uint8_t* p);
 };
@@ -185,7 +186,7 @@ struct ComponentDescriptor
 	uint8_t component_tag;
 	int32_t ISO_639_language_code;
 
-	std::vector<uint8_t> text_chars;
+	std::string text_chars;
 
 	bool parse(const uint8_t* p);
 };
@@ -469,10 +470,10 @@ struct ExtendedEventDescriptor
 {
 	struct ItemData
 	{
-		uint8_t              item_description_length;
-		std::vector<uint8_t> item_description_chars;
-		uint8_t              item_length;
-		std::vector<uint8_t> item_chars;
+		uint8_t     item_description_length;
+		std::string item_description_chars;
+		uint8_t     item_length;
+		std::string item_chars;
 	};
 
 	uint8_t descriptor_tag;
@@ -487,8 +488,8 @@ struct ExtendedEventDescriptor
 
 	std::vector<ItemData> item_list;
 
-	uint8_t text_length;
-	std::vector<uint8_t> text_chars;
+	uint8_t     text_length;
+	std::string text_chars;
 
 	bool parse(const uint8_t* p);
 };
@@ -533,9 +534,6 @@ struct MosaicDescriptor
 
 	std::vector<CellData> cell_list;
 
-	uint8_t text_length;
-	std::vector<uint8_t> text_chars;
-
 	bool parse(const uint8_t* p);
 };
 
@@ -561,7 +559,7 @@ struct NetworkNameDescriptor
 	uint8_t descriptor_tag;
 	uint8_t descriptor_length;
 
-	std::vector<uint16_t> network_name_chars;
+	std::string network_name_chars;
 
 	bool parse(const uint8_t* p);
 };
@@ -614,10 +612,10 @@ struct ServiceDescriptor
 	uint8_t descriptor_length;
 	uint8_t service_type;
 	uint8_t service_provider_name_length;
-	std::vector<uint8_t> service_provider_name_chars;
+	std::string service_provider_name_chars;
 
 	uint8_t service_name_length;
-	std::vector<uint8_t> service_name_chars;
+	std::string service_name_chars;
 
 	bool parse(const uint8_t* p);
 };
@@ -645,10 +643,10 @@ struct ShortEventDescriptor
 	int32_t ISO_639_language_code;
 	uint8_t event_name_length;
 
-	std::vector<uint8_t> event_name_chars;
+	std::string event_name_chars;
 
 	uint8_t text_length;
-	std::vector<uint8_t> text_chars;
+	std::string text_chars;
 
 	bool parse(const uint8_t* p);
 };
@@ -796,7 +794,7 @@ struct AudioComponentDescriptor
 	uint8_t sampling_rate;
 	int32_t ISO_639_language_code;
 	int32_t ISO_639_language_code_2;
-	std::vector<uint8_t> text_chars;
+	std::string text_chars;
 
 	bool parse(const uint8_t* p);
 };
@@ -935,7 +933,7 @@ struct SeriesDescriptor
 	uint16_t episode_number;
 	uint16_t last_episode_number;
 
-	std::vector<uint16_t> series_name_chars;
+	std::string series_name_chars;
 
 	bool parse(const uint8_t* p);
 };
@@ -992,7 +990,7 @@ struct BroadcasterNameDescriptor
 	uint8_t descriptor_tag;
 	uint8_t descriptor_length;
 
-	std::vector<uint8_t> broadcaster_name_chars;
+	std::string broadcaster_name_chars;
 
 	bool parse(const uint8_t* p);
 };
@@ -1013,7 +1011,7 @@ struct ComponentGroupDescriptor
 		std::vector<CAUnitData> CA_unit_list;
 		uint8_t total_bitrate;
 		uint8_t text_length;
-		std::vector<uint8_t> text_chars;
+		std::string text_chars;
 	};
 
 	uint8_t descriptor_tag;
@@ -1053,9 +1051,9 @@ struct BoardInformationDescriptor
 	uint8_t descriptor_tag;
 	uint8_t descriptor_length;
 	uint8_t title_length;
-	std::vector<uint8_t> title_chars;
+	std::string title_chars;
 	uint8_t text_length;
-	std::vector<uint8_t> text_chars;
+	std::string text_chars;
 
 	bool parse(const uint8_t* p);
 };
@@ -1108,7 +1106,7 @@ struct TSInformationDescriptor
 	uint8_t remote_control_key_id;
 	uint8_t length_of_ts_name;
 	uint8_t transmission_type_count;
-	std::vector<uint8_t> ts_name_chars;
+	std::string ts_name_chars;
 
 	std::vector<TSInfoData> TS_info_list;
 

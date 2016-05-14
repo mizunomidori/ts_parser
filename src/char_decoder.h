@@ -553,7 +553,7 @@ public:
 
 	void init();
 
-	void decode(const uint8_t* buffer, const uint16_t length);
+	std::string decode(const uint8_t* buffer, const uint16_t length);
 	void decode_C0(const uint8_t* buffer);
 	void decode_C1(const uint8_t* buffer);
 

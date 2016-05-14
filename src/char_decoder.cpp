@@ -39,7 +39,7 @@ static void dump_hex_bytes(T* p, I length)
 	fprintf(stderr, "\n");
 }
 
-void CharDecoder::decode(const uint8_t* buffer, const uint16_t length)
+std::string CharDecoder::decode(const uint8_t* buffer, const uint16_t length)
 {
 	init();
 
@@ -66,6 +66,7 @@ void CharDecoder::decode(const uint8_t* buffer, const uint16_t length)
 	}
 
 	//fprintf(stderr, "%s\n", chars.c_str());
+	return chars;
 }
 
 void CharDecoder::decode_C0(const uint8_t* buffer)
